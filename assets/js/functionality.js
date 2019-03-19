@@ -10,8 +10,20 @@ var config = {
 firebase.initializeApp(config);
 
 var database = firebase.database();
+var ref = database.ref('employees/');
 
-$("#submit-btn").on("click", function () {
+$("#submit-btn").on("click", createRow("","","",""));
+
+ref.on('child_added', function(data) {
+  console.log(data.val());
+  let user = data.val();
+  createRow(user.Name, user.Role, user.Start_Date, user.Monthly_Rate);
+});
+
+function createRow(name, role, startDate, monthlyRate)
+{
+  let d = new Date();
+  //let monthsWorked = (d.getMonth + 1 ) - parseInt(startDate.substr(startDate.indexOf("/"), startDate.indexOf("/") + 2));
 
   let tempRow = $("<div>");
   let colOne = $("<div>");    //employee name
@@ -29,12 +41,12 @@ $("#submit-btn").on("click", function () {
   colFive.addClass("col");
   colSix.addClass("col");
 
-  colOne.text("A Name");
-  colTwo.text("A Role");
-  colThree.text("dd/mm/yyyy");
-  colFour.text("27");
-  colFive.text("$$$$$");
-  colSix.text("$$$$$$$$$$");
+  colOne.text(name);
+  colTwo.text(role);
+  colThree.text(startDate);
+  colFour.text("some months");
+  colFive.text(monthlyRate);
+  colSix.text("some amount");
 
   tempRow.append(colOne);
   tempRow.append(colTwo);
@@ -44,7 +56,7 @@ $("#submit-btn").on("click", function () {
   tempRow.append(colSix);
 
   $("#tableContents").append(tempRow);
-});
+}
 
 $("#submitBtn").on("click", function() {
   let d = new Date();
@@ -53,14 +65,14 @@ $("#submitBtn").on("click", function() {
   let name = $("#nameInput").val();
   let role = $("#roleInput").val();
   let monthlyRate = $("#monthlyRateInput").val();
-  let startDate = d.getDate() + "/" + d.getMonth() + "/" + d.getFullYear();
+  let startDate = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
 
   writeEmployeeData(email, name, role, startDate, monthlyRate);
 });
 
 function writeEmployeeData(email, name, role, startDate, monthlyRate)
 {
-  database.ref('employees/' + email).set({
+  database.ref('employees/' + email).push({
     Name: name,
     Role: role,
     Start_Date: startDate,
